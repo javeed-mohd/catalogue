@@ -56,9 +56,12 @@ pipeline {
         stage('Build Image') {
             steps {
                 script {
-                    sh """
-                        docker build -t catalogue:${appVersion}
-                    """    
+                    withAWS(credentials: 'aws-creds', region: "${region}") {
+                        // Commands here will have AWS authentication
+                        sh """
+                            docker build -t ${ACC_ID}.dkr.ecr.${region}.amazonaws.com/roboshop/catalogue:${appVersion} .
+                        """
+                    }    
                 }
             }
         }
