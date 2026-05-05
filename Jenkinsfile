@@ -10,7 +10,7 @@ pipeline {
         region = "us-east-1"
     }
     options {
-        // disableConcurrentBuilds()
+        // disableConcurrentBuilds()    // Prevents multiple builds of the same job from running at the same time
         timeout(time: 5, unit: 'MINUTES')
     }
     /* parameters {
@@ -42,17 +42,6 @@ pipeline {
                 }
             }
         }
-        stage('Build') {
-            steps {
-                script {
-                    sh """
-                        echo "Building"
-                        echo $COURSE
-                        sleep 10
-                    """    
-                }
-            }
-        }
         stage('Build Image') {
             steps {
                 script {
@@ -71,10 +60,10 @@ pipeline {
             echo 'I will always say Hello again!'
         }
         success { 
-            echo 'Pipeline success'
+            echo 'Pipeline Success'
         }
         failure { 
-            echo 'Pipeline failure'
+            echo 'Pipeline Failure'
         }
     }
 }
