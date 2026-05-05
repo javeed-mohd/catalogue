@@ -6,8 +6,8 @@ pipeline {
     }
     environment {
         appVersion = ""
-        /* ACC_ID = "996669628469"
-        region = "us-east-1" */
+        ACCOUNT_ID = "996669628469"
+        region = "us-east-1"
     }
     options {
         // disableConcurrentBuilds()    // Prevents multiple builds of the same job from running at the same time
@@ -45,15 +45,14 @@ pipeline {
         stage('Build Image') {
             steps {
                 script {
-                    sh """
-                        docker build -t catalogue:${appVersion} .
-                    """
-                    /* withAWS(credentials: 'aws-creds', region: "${region}") {
-                        // Commands here will have AWS authentication
+                    withAWS(credentials: 'aws-creds', region: "${region}") {
+                        // Commands here will have AWS authentication which we have set
                         sh """
-                            docker build -t ${ACC_ID}.dkr.ecr.${region}.amazonaws.com/roboshop/catalogue:${appVersion} .
+                            aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${region}.amazonaws.com
+                            docker build -t ${ACCOUNT_ID}.dkr.ecr.${region}.amazonaws.com/roboshop/catalogue:${appVersion} .
+                            docker push ${ACCOUNT_ID}.dkr.ecr.${region}.amazonaws.com/roboshop/catalogue:${appVersion}
                         """
-                    } */    
+                    }    
                 }
             }
         }
