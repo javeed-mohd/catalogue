@@ -42,6 +42,15 @@ pipeline {
                 }
             }
         }
+        stage('Unit tests') {
+            steps {
+                script{
+                    sh """
+                        npm test
+                    """
+                }
+            }
+        }
         stage('SonarQube Analysis') {
             steps {
                 script {
