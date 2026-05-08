@@ -142,7 +142,7 @@ pipeline {
                             --format table \
                             --output trivy-os-report.txt \
                             --exit-code 0 \
-                            ${ACC_ID}.dkr.ecr.${region}.amazonaws.com/roboshop/catalogue:${appVersion}
+                            ${ACCOUNT_ID}.dkr.ecr.${region}.amazonaws.com/roboshop/catalogue:${appVersion}
                     """
 
                     // Print table to console
@@ -158,7 +158,7 @@ pipeline {
                                 --format table \
                                 --exit-code 1 \
                                 --quiet \
-                                ${ACC_ID}.dkr.ecr.${region}.amazonaws.com/roboshop/catalogue:${appVersion}
+                                ${ACCOUNT_ID}.dkr.ecr.${region}.amazonaws.com/roboshop/catalogue:${appVersion}
                         """,
                         returnStatus: true
                     )
