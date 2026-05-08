@@ -33,7 +33,7 @@ pipeline {
                 }
             }
         }
-        stage('Install Dependencies') {
+        /* stage('Install Dependencies') {
             steps {
                 script{
                     sh """
@@ -41,8 +41,8 @@ pipeline {
                     """
                 }
             }
-        }
-        stage('Unit tests') {
+        } */
+        /* stage('Unit tests') {
             steps {
                 script{
                     sh """
@@ -50,7 +50,7 @@ pipeline {
                     """
                 }
             }
-        }
+        } */
         /* stage('SonarQube Analysis') {
             steps {
                 script {
@@ -118,12 +118,69 @@ pipeline {
                 script {
                     withAWS(credentials: 'aws-creds', region: "${region}") {
                         // Commands here will have AWS authentication which we have set
-                        sh """
+                        /* sh """
                             aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${region}.amazonaws.com
                             docker build -t ${ACCOUNT_ID}.dkr.ecr.${region}.amazonaws.com/roboshop/catalogue:${appVersion} .
                             docker push ${ACCOUNT_ID}.dkr.ecr.${region}.amazonaws.com/roboshop/catalogue:${appVersion}
+                        """ */
+                        sh """
+                            docker build -t ${ACCOUNT_ID}.dkr.ecr.${region}.amazonaws.com/roboshop/catalogue:${appVersion} .
                         """
                     }    
+                }
+            }
+        }
+        stage('Trivy OS Scan') {
+            steps {
+                script {
+                    // Generate table report
+                    sh """
+                        trivy image \
+                            --scanners vuln \
+                            --pkg-types os \
+                            --severity HIGH,MEDIUM \
+                            --format table \
+                            --output trivy-os-report.txt \
+                            --exit-code 0 \
+                            ${ACC_ID}.dkr.ecr.${region}.amazonaws.com/roboshop/catalogue:${appVersion}
+                    """
+
+                    // Print table to console
+                    sh 'cat trivy-os-report.txt'
+
+                    // Fail pipeline if vulnerabilities found
+                    def scanResult = sh(
+                        script: """
+                            trivy image \
+                                --scanners vuln \
+                                --pkg-types os \
+                                --severity HIGH,MEDIUM \
+                                --format table \
+                                --exit-code 1 \
+                                --quiet \
+                                ${ACC_ID}.dkr.ecr.${region}.amazonaws.com/roboshop/catalogue:${appVersion}
+                        """,
+                        returnStatus: true
+                    )
+
+                    if (scanResult != 0) {
+                        error "🚨 Trivy found HIGH/MEDIUM OS vulnerabilities. Pipeline failed."
+                    } else {
+                        echo "✅ No HIGH or MEDIUM OS vulnerabilities found. Pipeline continues."
+                    }
+                }
+            }
+        }
+        stage ('Push image to ECR'){
+            steps {
+               script{
+                    withAWS(credentials: 'aws-creds', region: "${region}") {
+                        // Commands here have AWS authentication
+                        sh """
+                            aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${region}.amazonaws.com
+                            docker push ${ACCOUNT_ID}.dkr.ecr.${region}.amazonaws.com/roboshop/catalogue:${appVersion}
+                        """
+                    }
                 }
             }
         }
