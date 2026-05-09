@@ -162,8 +162,7 @@ pipeline {
                 }
             }
         }
-        stage('Trivy Dockerfile Scan') 
-        {
+        stage('Trivy Dockerfile Scan') {
             steps {
                 script {
                     sh """
@@ -195,7 +194,7 @@ pipeline {
                 }
             }
         }
-        stage ('Push image to ECR'){
+        stage('Push image to ECR') {
             steps {
                script{
                     withAWS(credentials: 'aws-creds', region: "${region}") {
