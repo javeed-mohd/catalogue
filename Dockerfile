@@ -13,7 +13,8 @@ COPY --from=builder /app /app
 ENV MONGO="true" \
     MONGO_URL="mongodb://mongodb:27017/catalogue"
 # Adding the user
-RUN addgroup -S roboshop && adduser -S roboshop -G roboshop
+RUN addgroup -S roboshop && adduser -S roboshop -G roboshop \
+    apk --no-cache update && apk --no-cache upgrade
 # Adding permissions
 RUN chown -R roboshop:roboshop /app
 USER roboshop
